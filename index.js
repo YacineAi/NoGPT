@@ -144,33 +144,59 @@ const onMessage = async (senderId, message) => {
       } else {
         await createUser({uid: senderId, time: timer, data: [] })
           .then((data, error) => {
-            botly.send({
-              "id": senderId,
-              "message": {
-              "text": "مستعمل جديد مرحبا",
-              "quick_replies":[
-                {
-                  "content_type":"text",
-                  "title":"كيفية الإستعمال 🤔",
-                  "payload":"",
-                }
-              ]
-            }
+            botly.sendButtons({
+              id: senderId,
+              text: "مرحبا 💬.\nأنا نوتي 🤗 روبوت ذكاء صناعي مدعم بـGPT 3.5 يمكنك سؤالي عن أي معلومات تحتاجها ✨\nاستطيع مساعدتك في كتابة النصوص و حل المشاكل البرمجية 🤓.\nيمكنك الان البدأ بإستعمالي ^-^",
+              buttons: [
+                botly.createWebURLButton("حساب المطور 💻👤", "facebook.com/0xNoti/"),
+              ],
             });
           });
       }
       } else if (message.message.attachments[0].payload.sticker_id) {
         //botly.sendText({id: senderId, text: "(Y)"});
       } else if (message.message.attachments[0].type == "image") {
-        botly.sendText({id: senderId, text: "NotAllowed"});
+        botly.sendText({id: senderId, text: "المرجو إستعمال النصوص فقط"});
       } else if (message.message.attachments[0].type == "audio") {
-        botly.sendText({id: senderId, text: "NotAllowed"});
+        botly.sendText({id: senderId, text: "المرجو إستعمال النصوص فقط"});
       } else if (message.message.attachments[0].type == "video") {
-        botly.sendText({id: senderId, text: "NotAllowed"});
+        botly.sendText({id: senderId, text: "المرجو إستعمال النصوص فقط"});
       }
 };
 /* ----- POSTBACK ----- */
 
-const onPostBack = async (senderId, message, postback) => {};
+const onPostBack = async (senderId, message, postback) => {
+  if (message.postback) {
+    if (postback == "") {
+      //
+    } else if (postback == "") {
+    } else if (postback == "") {
+      //
+    } else if (postback == "") {
+      //
+    } else if (postback == "") {
+      //
+    } else if (postback == "") {
+      //
+    } else if (message.postback.title == "") {
+      //
+    } else if (message.postback.title == "") {
+      //
+    } else if (message.postback.title == "") {
+      //
+    } else if (message.postback.title == "") {
+      //
+    }
+  } else {
+    // Quick Reply
+    if (message.message.text == "") {
+      //
+    } else if (message.message.text == "") {
+      //
+    } else if (postback == "up" || postback == "down") {
+      botly.sendText({id: senderId, text: "شكرا لترك التقييم ♥"});
+    }
+  }
+};
 /* ----- HANDELS ----- */
 app.listen(port, () => console.log(`App is on port : 3000`));
