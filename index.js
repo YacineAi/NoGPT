@@ -99,7 +99,7 @@ const onMessage = async (senderId, message) => {
               }
             }
           };
-          const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', message.message.text, { headers });
+          const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
           conv.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
           await updateUser(senderId, {time: timer, data: conv })
           .then((data, error) => {
