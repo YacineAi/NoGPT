@@ -84,6 +84,35 @@ const onMessage = async (senderId, message) => {
     /* ---- */
     if (message.message.text) {
       if (user[0]) {
+        if (Date.now() > user[0].time) {
+          var reset = [];
+          const data = {
+            action: "_ask",
+            model: "gpt-3.5-turbo",
+            jailbreak: "default",
+            meta: {
+              id: "",
+              content: {
+                conversation: reset,
+                internet_access: false,
+                content_type: "text",
+                parts: [{ content: message.message.text, role: "user" }]
+              }
+            }
+          };
+          const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
+          reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
+          await updateUser(senderId, {time: timer, data: reset })
+          .then((data, error) => {
+            if (error) {
+                botly.sendText({id: senderId, text: "حدث خطأ"});
+            }
+            botly.sendText({id: senderId, text: response.data,
+                quick_replies: [
+                  botly.createQuickReply("👍", "up"),
+                  botly.createQuickReply("👎", "down")]});
+            });
+        } else {
         var conv = user[0].data;
         const data = {
             action: "_ask",
@@ -108,9 +137,10 @@ const onMessage = async (senderId, message) => {
             }
             botly.sendText({id: senderId, text: response.data,
                 quick_replies: [
-                  botly.createQuickReply("إقتراح", ""),
-                  botly.createQuickReply("إقتراح", "")]});
+                  botly.createQuickReply("👍", "up"),
+                  botly.createQuickReply("👎", "down")]});
             });
+        }
       } else {
         await createUser({uid: senderId, time: timer, data: [] })
           .then((data, error) => {
