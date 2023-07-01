@@ -95,7 +95,7 @@ const onMessage = async (senderId, message) => {
                 conversation: conv,
                 internet_access: false,
                 content_type: "text",
-                parts: [{ content: message, role: "user" }]
+                parts: [{ content: message.message.text, role: "user" }]
               }
             }
           };
