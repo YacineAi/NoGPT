@@ -131,7 +131,7 @@ const onMessage = async (senderId, message) => {
                 }
               }
             };
-            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async (err, data) => {
+            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
             conv.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
             await updateUser(senderId, {time: timer, data: conv })
