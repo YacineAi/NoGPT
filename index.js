@@ -101,7 +101,7 @@ const onMessage = async (senderId, message) => {
                 }
               }
             };
-            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async (err, data) => {
+            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
               reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
               await updateUser(senderId, {time: timer, data: reset })
@@ -109,10 +109,12 @@ const onMessage = async (senderId, message) => {
                 if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
-                botly.sendText({id: senderId, text: response.data,
+                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
+                  botly.sendText({id: senderId, text: response.data,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
+                });
                 });
               });
           } else {
@@ -133,16 +135,18 @@ const onMessage = async (senderId, message) => {
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
-            conv.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
-            await updateUser(senderId, {time: timer, data: conv })
-            .then((data, error) => {
-              if (error) {
-                  botly.sendText({id: senderId, text: "حدث خطأ"});
-              }
-              botly.sendText({id: senderId, text: response.data,
-                  quick_replies: [
-                    botly.createQuickReply("👍", "up"),
-                    botly.createQuickReply("👎", "down")]});
+              conv.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
+              await updateUser(senderId, {time: timer, data: conv })
+              .then((data, error) => {
+                if (error) {
+                    botly.sendText({id: senderId, text: "حدث خطأ"});
+                }
+                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
+                  botly.sendText({id: senderId, text: response.data,
+                    quick_replies: [
+                      botly.createQuickReply("👍", "up"),
+                      botly.createQuickReply("👎", "down")]});
+                });
               });
             });
           }
