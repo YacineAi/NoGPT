@@ -18,16 +18,13 @@ app.get("/", function(_req, res) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const headers = {
-    'Accept': 'text/event-stream',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Connection': 'keep-alive',
-    'Content-type': 'application/json',
-    'Host': 'shuttleproxy.com:6999',
-    'Origin': 'http://shuttleproxy.com:6999',
-    'Referer': 'http://shuttleproxy.com:6999/chat/',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-  };
+  'accept-encoding': 'gzip',
+  'authorization': process.env.GPTOKEN,
+  'connection': 'Keep-Alive',
+  'content-type': 'application/json; charset=UTF-8',
+  'host': 'api.openai.com',
+  'user-agent': 'okhttp/4.10.0'
+};
 /* ----- MAGIC ----- */
 app.post('/webhook', (req, res) => {
  // console.log(req.body)
@@ -82,35 +79,27 @@ const onMessage = async (senderId, message) => {
     const user = await userDb(senderId);
     const timer = new Date().getTime() + 1 * 60 * 60 * 1000;
     /* ---- */
-    if (message.message.text) {
+    if (message.message.text) { // message.message.text
       botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.MARK_SEEN}, async () => {
         if (user[0]) {
           if (Date.now() > user[0].time) {
             var reset = [];
             const data = {
-              action: "_ask",
-              model: "gpt-3.5-turbo",
-              jailbreak: "default",
-              meta: {
-                id: "",
-                content: {
-                  conversation: reset,
-                  internet_access: false,
-                  content_type: "text",
-                  parts: [{ content: message.message.text, role: "user" }]
-                }
-              }
+              "model": "gpt-3.5-turbo",
+              "messages": [
+                { "role": "user", "content": message.message.text }
+              ]
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-              const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
-              reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
+              const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+              reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
               await updateUser(senderId, {time: timer, data: reset })
               .then((data, error) => {
                 if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data,
+                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
@@ -119,30 +108,21 @@ const onMessage = async (senderId, message) => {
               });
           } else {
           var conv = user[0].data;
+          conv.push({ "role": "user", "content": message.message.text })
           const data = {
-              action: "_ask",
-              model: "gpt-3.5-turbo",
-              jailbreak: "default",
-              meta: {
-                id: "",
-                content: {
-                  conversation: conv,
-                  internet_access: false,
-                  content_type: "text",
-                  parts: [{ content: message.message.text, role: "user" }]
-                }
-              }
-            };
+            "model": "gpt-3.5-turbo",
+            "messages": conv
+          };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-              const response = await axios.post('http://shuttleproxy.com:6999/backend-api/v2/conversation', data, { headers });
-              conv.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data });
+              const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+              conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
               await updateUser(senderId, {time: timer, data: conv })
               .then((data, error) => {
                 if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data,
+                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
