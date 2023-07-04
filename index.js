@@ -114,6 +114,7 @@ const onMessage = async (senderId, message) => {
             "messages": conv
           };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+              try {
               const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
               conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
               await updateUser(senderId, {time: timer, data: conv })
@@ -128,6 +129,31 @@ const onMessage = async (senderId, message) => {
                       botly.createQuickReply("👎", "down")]});
                 });
               });
+              } catch (error) {
+                var reset = [];
+                const data = {
+                  "model": "gpt-3.5-turbo",
+                  "messages": [
+                    { "role": "user", "content": message.message.text }
+                  ]
+                };
+                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+                  const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+                  reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
+                  await updateUser(senderId, {time: timer, data: reset })
+                  .then((data, error) => {
+                    if (error) {
+                      botly.sendText({id: senderId, text: "حدث خطأ"});
+                    }
+                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
+                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                    quick_replies: [
+                      botly.createQuickReply("👍", "up"),
+                      botly.createQuickReply("👎", "down")]});
+                });
+                });
+              });
+              }
             });
           }
         } else {
