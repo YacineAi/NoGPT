@@ -94,7 +94,10 @@ const onMessage = async (senderId, message) => {
               "model": "gpt-3.5-turbo",
               "messages": [
                 { "role": "user", "content": message.message.text }
-              ]
+              ],
+              "temperature": 1,
+              "max_tokens": 2048,
+              "stream": false
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
@@ -117,7 +120,10 @@ const onMessage = async (senderId, message) => {
           conv.push({ "role": "user", "content": message.message.text })
           const data = {
             "model": "gpt-3.5-turbo",
-            "messages": conv
+            "messages": conv,
+            "temperature": 1,
+            "max_tokens": 2048,
+            "stream": false
           };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               try {
@@ -141,7 +147,10 @@ const onMessage = async (senderId, message) => {
                   "model": "gpt-3.5-turbo",
                   "messages": [
                     { "role": "user", "content": message.message.text }
-                  ]
+                  ],
+                  "temperature": 1,
+                  "max_tokens": 2048,
+                  "stream": false
                 };
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
                   const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
