@@ -192,7 +192,7 @@ const onMessage = async (senderId, message) => {
               "accept": "application/json, text/plain, */*",
               "Referer": `https://${process.env.SITE}/chat`
             });
-          await createUser({uid: senderId, time: timer, data: [], token: tokenize.data.verifyToken})
+          await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: tokenize.data.verifyToken})
             .then((data, error) => {
               botly.sendButtons({
                 id: senderId,
