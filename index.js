@@ -18,13 +18,19 @@ app.get("/", function(_req, res) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const headers = {
-  'accept-encoding': 'gzip',
-  'authorization': process.env.GPTOKEN,
-  'connection': 'Keep-Alive',
-  'content-type': 'application/json; charset=UTF-8',
-  'host': 'api.openai.com',
-  'user-agent': 'okhttp/4.10.0'
-};
+    accept: '*/*',
+    'accept-language': 'en,ar-DZ;q=0.9,ar;q=0.8',
+    authorization: 'Bearer undefined',
+    'content-type': 'application/json',
+    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'cross-site',
+    Referer: `https://${process.env.REF}/`,
+    'Referrer-Policy': 'strict-origin-when-cross-origin'
+  };
 /* ----- MAGIC ----- */
 app.post('/webhook', (req, res) => {
  // console.log(req.body)
@@ -91,7 +97,7 @@ const onMessage = async (senderId, message) => {
               ]
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-              const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+              const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
               reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
               await updateUser(senderId, {time: timer, data: reset })
               .then((data, error) => {
@@ -115,7 +121,7 @@ const onMessage = async (senderId, message) => {
           };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               try {
-              const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+              const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
               conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
               await updateUser(senderId, {time: timer, data: conv })
               .then((data, error) => {
@@ -138,7 +144,7 @@ const onMessage = async (senderId, message) => {
                   ]
                 };
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-                  const response = await axios.post('https://api.openai.com/v1/chat/completions', data, { headers });
+                  const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
                   reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
                   await updateUser(senderId, {time: timer, data: reset })
                   .then((data, error) => {
