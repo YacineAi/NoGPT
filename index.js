@@ -11,6 +11,14 @@ const botly = new Botly({
 	notificationType: Botly.CONST.REGULAR,
 	FB_URL: "https://graph.facebook.com/v2.6/",
 });
+var head = {
+  accept: 'application/json, text/plain, */*',
+  'content-type': 'application/json',
+  'x-requested-with': 'XMLHttpRequest',
+  "x-xsrf-token": "eyJpdiI6IjYrVXJLd0hBMWZUeTEzOUx6YVY2Qnc9PSIsInZhbHVlIjoicmpxbzhxcmluS2swa2xFOEQ2bU8wNzFhRjBGcktodytZVHVmVGtmZmxFNkJDZUdLZkdZV2VYT2xSK25lTWZQV2RmQVVlNmVscXg3R21TZVA5RlpBWldMRHU5YXdRVk91RXVjcktnMzRCSDZiSzhLbU4rRFlqcjhjNmdvUThhUG8iLCJtYWMiOiI1Yjk2N2UwNzBlMmYzYjI0YzE5NzBjN2Y0ZGJmNWI0NGI5YmI4NTg1M2Q2ZWYyYjkxN2U2ZGZiZDg0MzRjNGUyIiwidGFnIjoiIn0=",
+  "cookie": "_ga=GA1.1.1852946914.1685914526; XSRF-TOKEN=eyJpdiI6IjYrVXJLd0hBMWZUeTEzOUx6YVY2Qnc9PSIsInZhbHVlIjoicmpxbzhxcmluS2swa2xFOEQ2bU8wNzFhRjBGcktodytZVHVmVGtmZmxFNkJDZUdLZkdZV2VYT2xSK25lTWZQV2RmQVVlNmVscXg3R21TZVA5RlpBWldMRHU5YXdRVk91RXVjcktnMzRCSDZiSzhLbU4rRFlqcjhjNmdvUThhUG8iLCJtYWMiOiI1Yjk2N2UwNzBlMmYzYjI0YzE5NzBjN2Y0ZGJmNWI0NGI5YmI4NTg1M2Q2ZWYyYjkxN2U2ZGZiZDg0MzRjNGUyIiwidGFnIjoiIn0%3D; gmailnator_session=eyJpdiI6Impwdml6d2JYQ3k3MEoyMUFFdkpkOFE9PSIsInZhbHVlIjoicy9TMFlSZm5vbnB5U0ZZWlRMa291alY2SkNvdW1ZdFQ1eW9sNmYvSUwvcVJ1WVpHOGZrc29WYWZ3VUN2ejFTV2U4enQrUHVqOS9aRlBTb1pnNEcvVWNnQ1NaR2hROUl4TzNldHZUcTg2RHU3TzVpQWVoRW9JZkZJL2grYkxVYmsiLCJtYWMiOiIxMTg5ZjZmYTM0Y2MyY2FhNGY2MWI3MDZkMzc2MzdlMzI3ODQxZDdhNjFhYWYyMjdlYWUyMTkwN2ZiZDFhZjgyIiwidGFnIjoiIn0%3D; _ga_6R52Y0NSMR=GS1.1.1688906997.9.1.1688907019.0.0.0",
+  Referer: 'https://www.emailnator.com/inbox'
+}
 app.get("/", function(_req, res) {
 	res.sendStatus(200);
 });
@@ -70,6 +78,9 @@ async function createUser(user) {
 const onMessage = async (senderId, message) => {
     const user = await userDb(senderId);
     const timer = new Date().getTime() + 1 * 60 * 60 * 1000;
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
     /* ---- */
     if (message.message.text) { // message.message.text
       botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.MARK_SEEN}, async () => {
@@ -192,14 +203,36 @@ const onMessage = async (senderId, message) => {
               "accept": "application/json, text/plain, */*",
               "Referer": `https://${process.env.SITE}/chat`
             });
-          await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: tokenize.data.verifyToken})
-            .then((data, error) => {
+            if (tokenize.data.message == "Verification mail has been sent.") {
               botly.sendButtons({
                 id: senderId,
                 text: "📣 تنبيه :\nقبل إستعمال نو جيبيتي 💜\nمن فضلك إذا أردت إستمرار الصفحة. الرجاء تسجيل إعجابك 👍🏻 إذا رأيت أن الصفحة تفيدك طبعا :) \nوصل عدد المستخدمين إلى 15الف و الصفحة مازالت لم تتجاوز ألف إعجاب !",
                 buttons: [
                   botly.createWebURLButton("حساب المطور 💻👤", "facebook.com/0xNoti/"),
                 ],
+              }, () => {
+                var reaxios = () => {
+                  axios.post('https://www.emailnator.com/message-list', {email: `${senderId}@smartnator.com`}, {headers: head})
+                .then(async (response) => {
+                  const emails = response.data.messageData;
+                  const verificationCodeEmails = emails.filter(email => email.from === 'MixerBox ChatAI <no-reply@id.mixerbox.com>');
+                  if(verificationCodeEmails[0]) {
+                    var auth = await axios.post(`https://${process.env.SITE}/api/login`, {
+                      "email": `${senderId}@smartnator.com`,
+                      "authCode": verificationCodeEmails[0].subject.replace(/\D/g, '')
+                    }, {
+                      "accept": "application/json, text/plain, */*",
+                      "Referer": `https://${process.env.SITE}/chat`
+                    });
+                    if(auth.data.message == "Login succeeded."){
+                      await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: auth.data.accessToken})
+                      .then((data, error) => {
+                        botly.sendButtons({
+                          id: senderId,
+                          text: "تم إنشاء حسابك يمكنك الان إستخدام نو جيبيتي :)",
+                          buttons: [
+                            botly.createWebURLButton("حساب المطور 💻👤", "facebook.com/0xNoti/"),
+                          ],
               });
               /*
               botly.sendButtons({
@@ -211,6 +244,24 @@ const onMessage = async (senderId, message) => {
               });
               */
             });
+                    } else {
+                      console.log(auth.data)
+                    }
+                  } else {
+                    sleep(3000).then(() => { reaxios(); })
+                    
+                  }
+                })
+                .catch(error => {
+                  // Handle the error
+                  console.error(error);
+                });
+                }
+                reaxios();
+              });
+            } else {
+              console.log(tokenize.data)
+            }
         }
       });
       } else if (message.message.attachments[0].payload.sticker_id) {
