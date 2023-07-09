@@ -17,20 +17,6 @@ app.get("/", function(_req, res) {
 /* ----- ESSENTIALS ----- */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-const headers = {
-    accept: '*/*',
-    'accept-language': 'en,ar-DZ;q=0.9,ar;q=0.8',
-    authorization: 'Bearer undefined',
-    'content-type': 'application/json',
-    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'cross-site',
-    Referer: `https://${process.env.REF}/`,
-    'Referrer-Policy': 'strict-origin-when-cross-origin'
-  };
 /* ----- MAGIC ----- */
 app.post('/webhook', (req, res) => {
  // console.log(req.body)
@@ -91,88 +77,122 @@ const onMessage = async (senderId, message) => {
           if (Date.now() > user[0].time) {
             var reset = [];
             const data = {
-              "model": "gpt-3.5-turbo",
-              "messages": [
-                { "role": "user", "content": message.message.text }
+              "prompt": [
+                {
+                  "role": "user",
+                  "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: " + message.message.text
+                }
               ],
-              "temperature": 1,
-              "max_tokens": 2048,
-              "stream": false
+              "lang": "en",
+              "model": 3.5,
+              "plugins": [],
+              "webVersion": "0.6.3",
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+              "isExtension": false,
+              "isSummarize": false,
+              "initialMessages": null,
+              "baseUrl": "",
+              "maxToken": 512
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-              const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
-              reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
-              await updateUser(senderId, {time: timer, data: reset })
-              .then((data, error) => {
-                if (error) {
+              const response = await axios.post(`https://${process.env.SITE}/api/chat/stream`, data, {
+                headers: {
+                'content-type': 'application/json',
+                'cookie': `access_token=${user[0].token}; has_token=true;`,
+                'Referer': `https://${process.env.SITE}/chat`
+              },
+              responseType: 'stream'});
+              let sentence = '';
+              response.data.on('data', chunk => {
+                const responseData = chunk.toString();
+                const lines = responseData.split("\n");
+                lines.forEach(line => {
+                  if (line.startsWith("data: ")) {
+                    const data = line.slice(6).trim();
+                    var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n")
+                    sentence += sh;
+                  }
+                });
+              });
+              response.data.on('end', async () => {
+                reset.push({ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: " + message.message.text }, { "role": "assistant", "content": sentence.trim() });
+                await updateUser(senderId, {time: timer, data: reset })
+                .then((data, error) => {
+                  if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
-                }
+                  }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                  botly.sendText({id: senderId, text: sentence.trim(),
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
                 });
                 });
               });
+              });
           } else {
           var conv = user[0].data;
           conv.push({ "role": "user", "content": message.message.text })
           const data = {
-            "model": "gpt-3.5-turbo",
-            "messages": conv,
-            "temperature": 1,
-            "max_tokens": 2048,
-            "stream": false
+            "prompt": conv,
+            "lang": "en",
+            "model": 3.5,
+            "plugins": [],
+            "webVersion": "0.6.3",
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+            "isExtension": false,
+            "isSummarize": false,
+            "initialMessages": null,
+            "baseUrl": "",
+            "maxToken": 512
           };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               try {
-              const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
-              conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
+                const response = await axios.post(`https://${process.env.SITE}/api/chat/stream`, data, {
+                  headers: {
+                  'content-type': 'application/json',
+                  'cookie': `access_token=${user[0].token}; has_token=true;`,
+                  'Referer': `https://${process.env.SITE}/chat`
+                },
+                responseType: 'stream'});
+                let sentence = '';
+              response.data.on('data', chunk => {
+                const responseData = chunk.toString();
+                const lines = responseData.split("\n");
+                lines.forEach(line => {
+                  if (line.startsWith("data: ")) {
+                    const data = line.slice(6).trim();
+                    var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n")
+                    sentence += sh;
+                  }
+                });
+              });
+              response.data.on('end', async () => { // sentence.trim()
+                conv.push({ "role": "assistant", "content": sentence.trim() });
               await updateUser(senderId, {time: timer, data: conv })
               .then((data, error) => {
                 if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                  botly.sendText({id: senderId, text: sentence.trim(),
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
                 });
+              });
               });
               } catch (error) {
-                var reset = [];
-                const data = {
-                  "model": "gpt-3.5-turbo",
-                  "messages": [
-                    { "role": "user", "content": message.message.text }
-                  ],
-                  "temperature": 1,
-                  "max_tokens": 2048,
-                  "stream": false
-                };
-                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
-                  const response = await axios.post(`https://${process.env.SHHHH}/v1/chat/completions`, data, { headers });
-                  reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
-                  await updateUser(senderId, {time: timer, data: reset })
-                  .then((data, error) => {
-                    if (error) {
-                      botly.sendText({id: senderId, text: "حدث خطأ"});
-                    }
-                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
-                    quick_replies: [
-                      botly.createQuickReply("👍", "up"),
-                      botly.createQuickReply("👎", "down")]});
-                });
-                });
-              });
+                console.log("ERR: ", error)
               }
             });
           }
         } else {
-          await createUser({uid: senderId, time: timer, data: [] })
+          var tokenize = await axios.post(`https://${process.env.SITE}/api/login`, { email: `${senderId}@smartnator.com`}, {
+              "accept": "application/json, text/plain, */*",
+              "Referer": "https://${process.env.SITE}/chat"
+            });
+          await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: tokenize.data.verifyToken})
             .then((data, error) => {
               botly.sendButtons({
                 id: senderId,
