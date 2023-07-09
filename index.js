@@ -221,8 +221,20 @@ const onMessage = async (senderId, message) => {
                       "email": `${senderId}@smartnator.com`,
                       "authCode": verificationCodeEmails[0].subject.replace(/\D/g, '')
                     }, {
+                      headers : {
+                        "accept": "application/json, text/plain, */*",
+                        "accept-language": "en,ar-DZ;q=0.9,ar;q=0.8",
+                        "content-type": "application/json",
+                        "sec-ch-ua": "\"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"114\", \"Google Chrome\";v=\"114\"",
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": "\"Windows\"",
+                        "sec-fetch-dest": "empty",
+                        "sec-fetch-mode": "cors",
+                        "sec-fetch-site": "same-origin",
+                        "cookie": `verify_token=${tokenize.data.verifyToken}`,  
                       "accept": "application/json, text/plain, */*",
                       "Referer": `https://${process.env.SITE}/chat`
+                      }
                     });
                     if(auth.data.message == "Login succeeded."){
                       await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: auth.data.accessToken})
