@@ -190,7 +190,7 @@ const onMessage = async (senderId, message) => {
         } else {
           var tokenize = await axios.post(`https://${process.env.SITE}/api/login`, { email: `${senderId}@smartnator.com`}, {
               "accept": "application/json, text/plain, */*",
-              "Referer": "https://${process.env.SITE}/chat"
+              "Referer": `https://${process.env.SITE}/chat`
             });
           await createUser({uid: senderId, time: timer, data: [], token: tokenize.data.verifyToken})
             .then((data, error) => {
