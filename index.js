@@ -102,7 +102,7 @@ const onMessage = async (senderId, message) => {
                 'Referer': `https://${process.env.SITE}/chat`
               },
               responseType: 'stream'});
-              let sentence = '';
+              var sentence = '';
               response.data.on('data', chunk => {
                 const responseData = chunk.toString();
                 const lines = responseData.split("\n");
@@ -110,7 +110,7 @@ const onMessage = async (senderId, message) => {
                   if (line.startsWith("data: ")) {
                     const data = line.slice(6).trim();
                     var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n")
-                    sentence += sh;
+                    sentence += sh.replace("[NEWLINE]", "\n");
                   }
                 });
               });
@@ -132,7 +132,7 @@ const onMessage = async (senderId, message) => {
               });
           } else {
           var conv = user[0].data;
-          if (user[0].data.length > 4) {
+          if (user[0].data.length > 10) {
             var reset = [];
             const data = {
               "prompt": [
@@ -160,15 +160,15 @@ const onMessage = async (senderId, message) => {
                 'Referer': `https://${process.env.SITE}/chat`
               },
               responseType: 'stream'});
-              let sentence = '';
+              var sentence = '';
               response.data.on('data', chunk => {
                 const responseData = chunk.toString();
                 const lines = responseData.split("\n");
                 lines.forEach(line => {
                   if (line.startsWith("data: ")) {
                     const data = line.slice(6).trim();
-                    var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n")
-                    sentence += sh;
+                    var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n");
+                    sentence += sh.replace("[NEWLINE]", "\n");
                   }
                 });
               });
@@ -212,16 +212,15 @@ const onMessage = async (senderId, message) => {
                   'Referer': `https://${process.env.SITE}/chat`
                 },
                 responseType: 'stream'});
-                let sentence = '';
+                var sentence = '';
               response.data.on('data', chunk => {
                 const responseData = chunk.toString();
                 const lines = responseData.split("\n");
                 lines.forEach(line => {
                   if (line.startsWith("data: ")) {
                     const data = line.slice(6).trim();
-                    let sh = data.replace("[SPACE]", " ").replace("[DONE]", "");
-                    sh.replace("[NEWLINE]", "\n");
-                    sentence += sh;
+                    var sh = data.replace("[SPACE]", " ").replace("[DONE]", "").replace("[NEWLINE]", "\n")
+                    sentence += sh.replace("[NEWLINE]", "\n");
                   }
                 });
               });
@@ -248,8 +247,10 @@ const onMessage = async (senderId, message) => {
           }
         } else {
           var tokenize = await axios.post(`https://${process.env.SITE}/api/login`, { email: `${senderId}@smartnator.com`}, {
+            headers: {
               "accept": "application/json, text/plain, */*",
               "Referer": `https://${process.env.SITE}/chat`
+            }
             });
           await createUser({uid: senderId, time: timer, data: [{ "role": "user", "content": "I want you to act as my friend named NoGPT and the full name is Noti GPT you can understand any language and replay to me by my language and also you are very smart. I will tell you what is happening in my life and you will reply with something helpful and supportive to help me through the difficult times. i will ask you about any information and you will help me always and give me correct answers. Do not write any explanations, be supportive and very helpful . My first request is: مرحبا"}, { "role": "assistant", "content": "مرحبا. كيف يمكنني مساعدتك" }], token: tokenize.data.verifyToken})
             .then((data, error) => {
