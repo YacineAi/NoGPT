@@ -75,10 +75,10 @@ const onMessage = async (senderId, message) => {
       botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.MARK_SEEN}, async () => {
         if (user[0]) {
           if (Date.now() > user[0].time) {
-            var reset = [{ "role": 'system', "content": 'Your name is NoGPT' }];
+            var reset = [{ "role": "system", "content": "Assistant is a large language model trained by OpenAI. and its name is NoGPT." }];
             const data = {
               past_conversations: [
-                { "role": 'system', "content": 'Your name is NoGPT' },
+                { "role": "system", "content": "Assistant is a large language model trained by OpenAI. and its name is NoGPT." },
                 { "role": 'user', "content": message.message.text },
               ]
             };
@@ -104,7 +104,7 @@ const onMessage = async (senderId, message) => {
             var reset = [{ role: 'system', content: 'Your name is NoGPT' }];
             const data = {
               past_conversations: [
-                { "role": 'system', "content": 'Your name is NoGPT' },
+                { "role": "system", "content": "Assistant is a large language model trained by OpenAI. and its name is NoGPT." },
                 { "role": 'user', "content": message.message.text },
               ]
             };
@@ -152,7 +152,7 @@ const onMessage = async (senderId, message) => {
           }
           }
         } else {
-          await createUser({uid: senderId, time: timer, data: [{ "role": 'system', "content": 'Your name is NoGPT' }]})
+          await createUser({uid: senderId, time: timer, data: [{ "role": "system", "content": "Your name is NoGPT" }]})
             .then((data, error) => {
               botly.sendButtons({
                 id: senderId,
