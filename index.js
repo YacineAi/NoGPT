@@ -82,6 +82,7 @@ const onMessage = async (senderId, message) => {
               ]
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+              try {
               const response = await axios.post(`https://${process.env.NOGPT}/fetch-response`, data, {'Content-Type': 'application/json'});
               reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.chatGPTResponse });
                 await updateUser(senderId, {time: timer, data: reset })
@@ -96,6 +97,11 @@ const onMessage = async (senderId, message) => {
                       botly.createQuickReply("👎", "down")]});
                 });
                 });
+              } catch (error) {
+                if (error.response.status == 429) {
+                    botly.sendText({id: senderId, text: "نو جيبيتي تحت الضغط الان :) جرب بعد ثواني"});
+                }
+              }
             });
           } else {
           var conv = user[0].data;
@@ -107,6 +113,7 @@ const onMessage = async (senderId, message) => {
               ]
             };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+              try {
               const response = await axios.post(`https://${process.env.NOGPT}/fetch-response`, data, {'Content-Type': 'application/json'});
               reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.chatGPTResponse });
                 await updateUser(senderId, {time: timer, data: reset })
@@ -121,6 +128,11 @@ const onMessage = async (senderId, message) => {
                       botly.createQuickReply("👎", "down")]});
                 });
                 });
+              } catch (error) {
+                if (error.response.status == 429) {
+                    botly.sendText({id: senderId, text: "نو جيبيتي تحت الضغط الان :) جرب بعد ثواني"});
+                }
+              }
             });
           } else {
             conv.push({ "role": "user", "content": message.message.text })
@@ -144,7 +156,9 @@ const onMessage = async (senderId, message) => {
                 });
                 });
               } catch (error) {
-                console.log("ERR: ", error)
+                if (error.response.status == 429) {
+                    botly.sendText({id: senderId, text: "نو جيبيتي تحت الضغط الان :) جرب بعد ثواني"});
+                }
               }
             });
           }
