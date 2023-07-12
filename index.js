@@ -98,7 +98,7 @@ const onMessage = async (senderId, message) => {
                 });
                 });
               } catch (error) {
-                if (error.response.status == 429) {
+                if (error.response.status == 429 || error.response.status == 524) {
                   console.log(error.response.status);
                   botly.sendText({id: senderId, text: "أسف ✋🏻 عدد كبير من الناس يستخدمون NoGPT الان 🤯\nخذ ثواني من وقتك و ضع إعجاب للصفحة إذا لم تكن معجب بعد 🙂."});
                 }
@@ -131,7 +131,7 @@ const onMessage = async (senderId, message) => {
                 });
               } catch (error) {
                 console.log(error.response.status);
-                if (error.response.status == 429) {
+                if (error.response.status == 429 || error.response.status == 524) {
                   botly.sendText({id: senderId, text: "أسف ✋🏻 عدد كبير من الناس يستخدمون NoGPT الان 🤯\nخذ ثواني من وقتك و ضع إعجاب للصفحة إذا لم تكن معجب بعد 🙂."});
                 }
               }
@@ -159,7 +159,7 @@ const onMessage = async (senderId, message) => {
                 });
               } catch (error) {
                 console.log(error.response.status);
-                if (error.response.status == 429) {
+                if (error.response.status == 429 || error.response.status == 524) {
                     botly.sendText({id: senderId, text: "أسف ✋🏻 عدد كبير من الناس يستخدمون NoGPT الان 🤯\nخذ ثواني من وقتك و ضع إعجاب للصفحة إذا لم تكن معجب بعد 🙂."});
                 }
               }
