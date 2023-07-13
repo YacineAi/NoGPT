@@ -87,11 +87,7 @@ const onMessage = async (senderId, message) => {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: sentence.trim(),
-                    quick_replies: [
-                      botly.createQuickReply("👍", "up"),
-                      botly.createQuickReply("👎", "down")]});
-                });
+                  botly.sendText({id: senderId, text: "تم انشاء حسابك :) يمكنك الان استعمال نو جيبيتي"}); });
               });
 
           }
