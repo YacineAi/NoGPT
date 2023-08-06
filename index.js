@@ -102,8 +102,33 @@ const onMessage = async (senderId, message) => {
               });
           } else {
           var conv = user[0].data;
-          conv.push({ "role": "user", "content": message.message.text })
-          const data = {
+          if (user[0].data.length > 10) {
+            var reset = [];
+            const data = {
+              "model": "gpt-3.5-turbo",
+              "messages": [
+                { "role": "user", "content": message.message.text }
+              ]
+            };
+            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+              const response = await axios.post(`https://${process.env.SITE}/openai/chat`, data, { headers });
+              reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
+              await updateUser(senderId, {time: timer, data: reset })
+              .then((data, error) => {
+                if (error) {
+                    botly.sendText({id: senderId, text: "حدث خطأ"});
+                }
+                botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
+                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                    quick_replies: [
+                      botly.createQuickReply("👍", "up"),
+                      botly.createQuickReply("👎", "down")]});
+                });
+                });
+              });
+          } else {
+            conv.push({ "role": "user", "content": message.message.text })
+            const data = {
             "model": "gpt-3.5-turbo",
             "messages": conv
           };
@@ -123,6 +148,7 @@ const onMessage = async (senderId, message) => {
                 });
               });
             });
+          }
           }
         } else {
           await createUser({uid: senderId, time: timer, data: [] })
