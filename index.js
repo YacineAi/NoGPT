@@ -5,7 +5,6 @@ const Botly = require("botly");
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SB_URL, process.env.SB_KEY, { auth: { persistSession: false} });
-const port = process.env.PORT || 3000;
 const botly = new Botly({
 	accessToken: process.env.PAGE_ACCESS_TOKEN,
 	notificationType: Botly.CONST.REGULAR,
@@ -133,9 +132,34 @@ const onMessage = async (senderId, message) => {
             "messages": conv
           };
             botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
+              try {
+                const response = await axios.post(`https://${process.env.SITE}/openai/chat`, data, { headers });
+                conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
+                await updateUser(senderId, {time: timer, data: conv })
+                .then((data, error) => {
+                  if (error) {
+                    botly.sendText({id: senderId, text: "حدث خطأ"});
+                  }
+                  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
+                    botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                      quick_replies: [
+                        botly.createQuickReply("👍", "up"),
+                        botly.createQuickReply("👎", "down")]});
+                      });
+                    }); 
+              } catch (error) {
+                if (error.response.status == 400) {
+                  var reset = [];
+            const data = {
+              "model": "gpt-3.5-turbo",
+              "messages": [
+                { "role": "user", "content": message.message.text }
+              ]
+            };
+            botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON}, async () => {
               const response = await axios.post(`https://${process.env.SITE}/openai/chat`, data, { headers });
-              conv.push({ "role": "assistant", "content": response.data.choices[0].message.content });
-              await updateUser(senderId, {time: timer, data: conv })
+              reset.push({ "role": "user", "content": message.message.text }, { "role": "assistant", "content": response.data.choices[0].message.content });
+              await updateUser(senderId, {time: timer, data: reset })
               .then((data, error) => {
                 if (error) {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
@@ -146,7 +170,12 @@ const onMessage = async (senderId, message) => {
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
                 });
+                });
               });
+                } else {
+                  console.log("ERR : ", error.response.status)
+                }
+              }
             });
           }
           }
@@ -209,4 +238,4 @@ const onPostBack = async (senderId, message, postback) => {
   }
 };
 /* ----- HANDELS ----- */
-app.listen(port, () => console.log(`App is on port : ${port}`));
+app.listen(3000, () => console.log(`App is on port : 3000`));
