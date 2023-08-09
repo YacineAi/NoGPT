@@ -65,6 +65,30 @@ async function createUser(user) {
       return data
     }
   };
+
+  function splitTextIntoChunks(text, chunkSize) {
+    const words = text.split(' ');
+    const chunks = [];
+    let currentChunk = '';
+
+    for (const word of words) {
+        if (currentChunk.length + word.length + 1 <= chunkSize) { // +1 for the space
+            if (currentChunk) {
+                currentChunk += ' ';
+            }
+            currentChunk += word;
+        } else {
+            chunks.push(currentChunk);
+            currentChunk = word;
+        }
+    }
+
+    if (currentChunk) {
+        chunks.push(currentChunk);
+    }
+
+    return chunks;
+}
 /* ----- HANDELS ----- */
 const headers = {
   'Content-Type': 'application/json'
@@ -93,10 +117,20 @@ const onMessage = async (senderId, message) => {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                  if (response.data.choices[0].message.content.length > 2000) {
+                    const textChunks = splitTextIntoChunks(response.data.choices[0].message.content, 1600);
+                    textChunks.forEach((x) => {
+                      botly.sendText({id: senderId, text: x,
+                        quick_replies: [
+                          botly.createQuickReply("👍", "up"),
+                          botly.createQuickReply("👎", "down")]});
+                    })
+                  } else {
+                    botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
+                  }
                 });
                 });
               });
@@ -119,10 +153,20 @@ const onMessage = async (senderId, message) => {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                  if (response.data.choices[0].message.content.length > 2000) {
+                    const textChunks = splitTextIntoChunks(response.data.choices[0].message.content, 1600);
+                    textChunks.forEach((x) => {
+                      botly.sendText({id: senderId, text: x,
+                        quick_replies: [
+                          botly.createQuickReply("👍", "up"),
+                          botly.createQuickReply("👎", "down")]});
+                    })
+                  } else {
+                    botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
+                  }
                 });
                 });
               });
@@ -142,10 +186,20 @@ const onMessage = async (senderId, message) => {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                   }
                   botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                    botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                    if (response.data.choices[0].message.content.length > 2000) {
+                      const textChunks = splitTextIntoChunks(response.data.choices[0].message.content, 1600);
+                      textChunks.forEach((x) => {
+                        botly.sendText({id: senderId, text: x,
+                          quick_replies: [
+                            botly.createQuickReply("👍", "up"),
+                            botly.createQuickReply("👎", "down")]});
+                      })
+                    } else {
+                      botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                       quick_replies: [
                         botly.createQuickReply("👍", "up"),
                         botly.createQuickReply("👎", "down")]});
+                    }
                       });
                     }); 
               } catch (error) {
@@ -166,10 +220,20 @@ const onMessage = async (senderId, message) => {
                     botly.sendText({id: senderId, text: "حدث خطأ"});
                 }
                 botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}, async () => {
-                  botly.sendText({id: senderId, text: response.data.choices[0].message.content,
+                  if (response.data.choices[0].message.content.length > 2000) {
+                    const textChunks = splitTextIntoChunks(response.data.choices[0].message.content, 1600);
+                    textChunks.forEach((x) => {
+                      botly.sendText({id: senderId, text: x,
+                        quick_replies: [
+                          botly.createQuickReply("👍", "up"),
+                          botly.createQuickReply("👎", "down")]});
+                    })
+                  } else {
+                    botly.sendText({id: senderId, text: response.data.choices[0].message.content,
                     quick_replies: [
                       botly.createQuickReply("👍", "up"),
                       botly.createQuickReply("👎", "down")]});
+                  }
                 });
                 });
               });
