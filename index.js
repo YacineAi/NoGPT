@@ -94,13 +94,14 @@ const headers = {
   'Content-Type': 'application/json'
 };
 const onMessage = async (senderId, message) => {
+  /*
   botly.sendButtons(
     {
       id: senderId,
       text: "نو جيبيتي متوقف للصيانة. نقدر صبركم ♥",
       buttons: [botly.createWebURLButton("NOTI 💻", "facebook.com/0xNoti/")],
     })
-  /*
+    */
     const user = await userDb(senderId);
     const timer = new Date().getTime() + 1 * 60 * 60 * 1000;
     if (message.message.text) { // message.message.text
@@ -272,7 +273,6 @@ const onMessage = async (senderId, message) => {
       } else if (message.message.attachments[0].type == "video") {
         botly.sendText({id: senderId, text: "المرجو إستعمال النصوص فقط"});
       }
-      */
 };
 /* ----- POSTBACK ----- */
 
